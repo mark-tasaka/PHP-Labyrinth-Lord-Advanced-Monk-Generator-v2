@@ -27,7 +27,6 @@ function getHitPoints($level, $conMod)
 }
 
 
-
 function saveBreathAttack($level)
 {
     if($level <= 4)
@@ -44,11 +43,11 @@ function saveBreathAttack($level)
     }
     else if($level >= 13 && $level <= 16)
     {
-        return 10;
+        return 8;
     }
     else
     {
-        return 8;
+        return 6;
     }
 
 }
@@ -58,6 +57,31 @@ function savePoisonDeath($level)
 {
     if($level <= 4)
     {
+        return 11;
+    }
+    else if($level >= 5 && $level <= 8)
+    {
+        return 9;
+    }
+    else if($level >= 9 && $level <= 12)
+    {
+        return 7;
+    }
+    else if($level >= 13 && $level <= 16)
+    {
+        return 3;
+    }
+    else
+    {
+        return 2;
+    }
+}
+
+
+function savePetrify($level)
+{
+    if($level <= 4)
+    {
         return 14;
     }
     else if($level >= 5 && $level <= 8)
@@ -75,31 +99,6 @@ function savePoisonDeath($level)
     else
     {
         return 6;
-    }
-}
-
-
-function savePetrify($level)
-{
-    if($level <= 4)
-    {
-        return 13;
-    }
-    else if($level >= 5 && $level <= 8)
-    {
-        return 11;
-    }
-    else if($level >= 9 && $level <= 12)
-    {
-        return 9;
-    }
-    else if($level >= 13 && $level <= 16)
-    {
-        return 7;
-    }
-    else
-    {
-        return 5;
     }
 
 }
@@ -109,23 +108,23 @@ function saveWands($level)
 {
     if($level <= 4)
     {
-        return 15;
+        return 12;
     }
     else if($level >= 5 && $level <= 8)
     {
-        return 13;
+        return 10;
     }
     else if($level >= 9 && $level <= 12)
     {
-        return 11;
+        return 8;
     }
     else if($level >= 13 && $level <= 16)
     {
-        return 9;
+        return 4;
     }
     else
     {
-        return 7;
+        return 4;
     }
 
 }
@@ -135,7 +134,7 @@ function saveSpells($level)
 {
     if($level <= 4)
     {
-        return 14;
+        return 15;
     }
     else if($level >= 5 && $level <= 8)
     {
@@ -143,18 +142,19 @@ function saveSpells($level)
     }
     else if($level >= 9 && $level <= 12)
     {
-        return 10;
+        return 9;
     }
     else if($level >= 13 && $level <= 16)
     {
-        return 8;
+        return 6;
     }
     else
     {
-        return 6;
+        return 5;
     }
 
 }
+
 
 function primeReq($abilityScore)
 {
@@ -479,7 +479,7 @@ function startingAge($species)
     if($species == "Human")
     {
         $age += 18;
-        $dieRoll = rand(1, 4);
+        $dieRoll = rand(1, 6);
         $age += $dieRoll;
     }
 
@@ -550,6 +550,43 @@ function startingAge($species)
     return $age;
 
 }
+
+function strengthMin($strength)
+{
+    if($strength < 12)
+    {
+        return 12;
+    }
+    else
+    {
+        return $strength; 
+    }
+}
+
+function dexterityMin($dexterity)
+{
+    if($dexterity < 15)
+    {
+        return 15;
+    }
+    else
+    {
+        return $dexterity; 
+    }
+}
+
+function wisdomMin($wisdom)
+{
+    if($wisdom < 15)
+    {
+        return 15;
+    }
+    else
+    {
+        return $wisdom; 
+    }
+}
+
 
 
 ?>

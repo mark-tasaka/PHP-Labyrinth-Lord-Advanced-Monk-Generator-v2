@@ -24,7 +24,6 @@
     <!--PHP-->
     <?php
     
-    //include 'php/armour.php';
     include 'php/checks.php';
     include 'php/weapons.php';
     include 'php/gear.php';
@@ -40,6 +39,7 @@
     include 'php/demiHumans.php';
     include 'php/abilityAddition.php';
     include 'php/thiefSkills.php';
+    include 'php/monkAbilities.php';
     
 
 
@@ -116,13 +116,9 @@
             $playerName = $_POST["thePlayerName"];
     
         }
-        
-        
-        if(isset($_POST["theSpecies"]))
-        {
-            $species = $_POST["theSpecies"];
-    
-        }
+
+
+        $species = "Human";
     
         if(isset($_POST["theLevel"]))
         {
@@ -187,6 +183,7 @@
                 $strengthString = $_POST["theStrength"];
                 $strength = intval($strengthString);
                 $strength = demiHumanStrengthRange($strength, $species);
+                $strength = strengthMin($strength);
             }      
 
             if(isset($_POST["theDexterity"]))
@@ -194,6 +191,7 @@
                 $dexterityString = $_POST["theDexterity"];
                 $dexterity = intval($dexterityString);
                 $dexterity = demiHumanDexterityRange($dexterity, $species);
+                $dexterity = dexterityMin($dexterity);
             }     
 
             if(isset($_POST["theConstitution"]))
@@ -215,6 +213,7 @@
                 $wisdomString = $_POST["theWisdom"];
                 $wisdom = intval($wisdomString);
                 $wisdom = demiHumanWisdomRange($wisdom, $species);
+                $wisdom = wisdomMin($wisdom);
             }  
 
             if(isset($_POST["theCharisma"]))
@@ -247,14 +246,17 @@
     
             $strength = $abilityScoreArray[0];
             $strength = demiHumanStrengthRange($strength, $species);
+            $strength = strengthMin($strength);
             $dexterity = $abilityScoreArray[1];
             $dexterity = demiHumanDexterityRange($dexterity, $species);
+            $dexterity = dexterityMin($dexterity);
             $constitution = $abilityScoreArray[2];
             $constitution = demiHumanConstitutionRange($constitution, $species);
             $intelligence = $abilityScoreArray[3];
             $intelligence = demiHumanIntelligenceRange($intelligence, $species);
             $wisdom = $abilityScoreArray[4];
             $wisdom = demiHumanWisdomRange($wisdom, $species);
+            $wisdom = wisdomMin($wisdom);
             $charisma = $abilityScoreArray[5];
             $charisma = demiHumanCharismaRange($charisma, $species);
             
@@ -280,30 +282,16 @@
         $wisdomMod = getAbilityModifier($wisdom);
         $charismaMod = getAbilityModifier($charisma);
 
-/*
-        if(isset($_POST["theArmour"]))
-        {
-            $armour = $_POST["theArmour"];
-        }
-    
-        $armourName = getArmour($armour)[0];
-        
-        $armourACBonus = getArmour($armour)[1];
-        $armourWeight = getArmour($armour)[2];
+        $monkACBonus = monkAcBonus($level);
 
-       $totalAcDefense = $armourACBonus;*/
-
-
-       //$speed = 30;
-
-
-       $baseArmourClass = 9 - $dexterityMod;
+       $baseArmourClass = 9 - $monkACBonus;
 
        $armourClass = $baseArmourClass;
 
        
        $hitPoints = getHitPoints($level, $constitutionMod);
-       $hdMessage = "HD: d4";
+       $hitDice = $level + 1;
+       $hdMessage = "HD: " . $hitDice . "d4";
 
 
         $weaponArray = array();
@@ -440,9 +428,8 @@
 
         $totalWeightCarried = $armourAndWeapomWeight + $totalWeightGear + $coinWeight;
 
-        $turnMovement = turnMovement($totalWeightCarried);
-        $encounterMovement = encounterMovement($totalWeightCarried);
-        $runningMovement = runningMovement($totalWeightCarried);
+        $turnMovement = turnMovement($totalWeightCarried, $level);
+        $encounterMovement = encounterMovement($turnMovement);
 
         $saveBreathMod = demiHumanBreathMod($species);
         $savePoisonDeathMod = demiHumanPoisonMod($species);
@@ -464,11 +451,11 @@
         $saveSpells -= $wisdomMod;
         $saveSpells -= $saveSpellsMod;
 
-        $primeReq = primeReq($dexterity);
         $resSurvival = survivalResurrection($constitution);
         $shockSurvival = survivalShock($constitution);
+        $monkDamageBonus =  weaponDamageBonus($level);
+        $monkAbilities = monkAbility($level);
         $demiHumanTraits = demiHumanTraits($species);
-        $thiefMessage = thiefMessage($level);
 
         $strengthDescription = strengthModifierDescription($strength);
         $dexterityDescription = dexterityModifierDescription($dexterity);
@@ -519,32 +506,25 @@
         $missileHitAC9 = $missileHitAC0  - 9;
         $missileHitAC9 = getThacoCheck($missileHitAC9);
         
-        $pickLock = getPickLocks($level);
-        $pickLockAdjust =  adjustPickLocks($species);
-        $pickLock -= $pickLockAdjust;
+        $pickLock = pickLocks($level);
 
-        $findTrap = getFindTrap($level);
-        $findTrapAdjust = adjustFindRemoveTraps($species);
-        $findTrap -= $findTrapAdjust;
+        $findTrap = findRemoveTraps($level);
 
-        $pickPockets = getPickPockets($level);
-        $pickPocketsAdjust = adjustPickPockets($species);
-        $pickPockets -= $pickPocketsAdjust;
+        $pickPockets = pickPockets($level);
 
+        $moveSilently = moveSilently($level);
 
-        $moveSilently = getMoveSilently($level);
-        $moveSilentlyAjust = adjustMoveSilently($species);
-        $moveSilently -= $moveSilentlyAjust;
+        $climbWall = climbWalls($level);
 
-        $climbWall = getClimbWall($level);
-        $climbWallAdjust = adjustClimbWalls($species);
-        $climbWall -= $climbWallAdjust;
+        $hideShadow = hideInShadows($level);
 
-        $hideShadow = getHideShadows($level);
-        $hideShadowAdjust = adjustHideShadow($species);
-        $hideShadow -= $hideShadowAdjust;
+        $hearNoise = hearNoise($level);
 
-        $hearNoise = getHearNoise($level, $species);
+        $unarmedDamage = monkUnarmedDamage($level);
+
+        $monkMovement = monkMovement($level);
+
+        $unarmedAttacks = monkUnarmedAttacks($level);
     
     
     ?>
@@ -1033,7 +1013,7 @@
 
        <span id="runningMovement">
            <?php
-                echo $runningMovement;
+                echo $turnMovement . '/round';
            ?>
        </span>
 
@@ -1078,11 +1058,45 @@
         
         <span id="classAbilities">
             <?php
-                echo $primeReq;
-                echo "Backstab: +4 attack bonus; x2 damage.";
                 echo "Survive Resurrection " . $resSurvival . "%; Survive Transformative Shock " . $shockSurvival . "%<br/>"; 
-                echo $thiefMessage;
+                echo $monkDamageBonus . '<br/>';
+                echo $monkAbilities;
                 echo $demiHumanTraits;
+            ?>
+        </span>
+
+        
+        <span id="monkACBonus">
+            <?php
+            if($monkACBonus < 1)
+            {
+                echo $monkACBonus;
+
+            }
+            else
+            {
+                echo "-" . $monkACBonus;
+
+            }
+            ?>
+        </span>
+        
+        <span id="unarmedDamage">
+            <?php
+                echo $unarmedDamage;
+            ?>
+        </span>
+        
+        <span id="monkMovement">
+            <?php
+                echo $monkMovement;
+            ?>
+        </span>
+        
+        
+        <span id="unarmedAttacks">
+            <?php
+                echo $unarmedAttacks;
             ?>
         </span>
 
@@ -1127,7 +1141,7 @@
         
         <span id="hearNoise">
             <?php
-                echo $hearNoise;
+                echo '1-' . $hearNoise;
             ?>
         </span>
 
